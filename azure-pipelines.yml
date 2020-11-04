@@ -13,7 +13,7 @@ variables:
   dockerRegistryServiceConnection: '1b3541aa-ea83-4430-be86-765ba97b49d2'
   imageRepository: 'deeplinking'
   containerRegistry: 'noruaebscontainerregistry.azurecr.io'
-  dockerfilePath: '$(Build.SourceDirectory)/DeepLinking/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/DeepLinking/Dockerfile'
   tag: '$(Build.BuildId)'
   
   # Agent VM image name
