@@ -13,7 +13,7 @@ variables:
   dockerRegistryServiceConnection: '9bc71847-e040-4e04-a0a1-0e6a872a5438'
   imageRepository: 'deeplinking'
   containerRegistry: 'stagenoruaebscontainerregistry.azurecr.io'
-  dockerfilePath: '$(Build.SourceDirectory)/DeepLinking/Dockerfile.stage'
+  dockerfilePath: '$(Build.SourcesDirectory)/DeepLinking/Dockerfile.stage'
   tag: '$(Build.BuildId)'
   
   # Agent VM image name

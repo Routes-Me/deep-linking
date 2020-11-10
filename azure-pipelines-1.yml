@@ -10,7 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '1b3541aa-ea83-4430-be86-765ba97b49d2'
+  dockerRegistryServiceConnection: '2ef1d613-1330-41a6-8a28-337c14b76b89'
   imageRepository: 'deeplinking'
   containerRegistry: 'noruaebscontainerregistry.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/DeepLinking/Dockerfile'
