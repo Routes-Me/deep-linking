@@ -47,6 +47,7 @@ namespace DeepLinking.Controllers
                     {
                         foreach (var item in promotions)
                         {
+                            var webLink = promotions.Where(x => x.PromotionId == id).Select(x => x.Web).FirstOrDefault();
                             if (clientInfo.OS.Family.ToLower() == "windows")
                             {
                                 if (string.IsNullOrEmpty(item.Web))
@@ -62,7 +63,10 @@ namespace DeepLinking.Controllers
                             {
                                 if (string.IsNullOrEmpty(item.Ios))
                                 {
-                                    return Redirect(_appSettings.RoutesAppUrl + id);
+                                    if (string.IsNullOrEmpty(webLink))
+                                        return Redirect(_appSettings.RoutesAppUrl + id);
+                                    else
+                                        return Redirect(webLink);
                                 }
                                 else
                                 {
@@ -73,7 +77,10 @@ namespace DeepLinking.Controllers
                             {
                                 if (string.IsNullOrEmpty(item.Android))
                                 {
-                                    return Redirect(_appSettings.RoutesAppUrl + id);
+                                    if (string.IsNullOrEmpty(webLink))
+                                        return Redirect(_appSettings.RoutesAppUrl + id);
+                                    else
+                                        return Redirect(webLink);
                                 }
                                 else
                                 {
