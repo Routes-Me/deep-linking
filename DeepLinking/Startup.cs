@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
+using DeepLinking.Abstraction;
 using DeepLinking.Helper;
+using DeepLinking.Helper.CronJobServices;
+using DeepLinking.Helper.CronJobServices.CronJobExtensionMethods;
+using DeepLinking.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -26,7 +30,15 @@ namespace DeepLinking
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCronJob<AnalyticSynced>(c =>
+            {
+                c.TimeZoneInfo = TimeZoneInfo.Local;
+                //c.CronExpression = @"*/1 * * * * *";
+                c.CronExpression = @"0 3 1 */2 *"; //  Run every 60 days at 3 AM
+            });
+
             services.AddControllersWithViews();
+            services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.Configure<Dependencies>(Configuration.GetSection("Dependencies"));
             services.AddRazorPages();
