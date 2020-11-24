@@ -42,18 +42,19 @@ namespace DeepLinking
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.Configure<Dependencies>(Configuration.GetSection("Dependencies"));
             services.AddRazorPages();
-            services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-                options.HttpsPort = 443;
-            });
 
-            services.AddHsts(options =>
-            {
-                options.Preload = false;
-                options.IncludeSubDomains = false;
-                options.MaxAge = TimeSpan.FromDays(30);
-            });
+            // services.AddHttpsRedirection(options =>
+            // {
+            //     options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+            //     options.HttpsPort = 443;
+            // });
+
+            // services.AddHsts(options =>
+            // {
+            //     options.Preload = false;
+            //     options.IncludeSubDomains = false;
+            //     options.MaxAge = TimeSpan.FromDays(30);
+            // });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
