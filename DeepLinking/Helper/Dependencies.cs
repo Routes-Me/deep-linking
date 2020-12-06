@@ -9,5 +9,8 @@ namespace DeepLinking.Helper
     {
         public string PromotionsUrl { get; set; }
         public string AnalyticsUrl { get; set; }
+        public string GetAnalyticsUrl { get; set; }
+        public string PostAnalyticsUrl { get; set; }
+        public string GetPromotions { get; set; }
     }
 }

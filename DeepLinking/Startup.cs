@@ -7,13 +7,16 @@ using DeepLinking.Abstraction;
 using DeepLinking.Helper;
 using DeepLinking.Helper.CronJobServices;
 using DeepLinking.Helper.CronJobServices.CronJobExtensionMethods;
+using DeepLinking.Models.DBModels;
 using DeepLinking.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 
 namespace DeepLinking
 {
@@ -33,27 +36,34 @@ namespace DeepLinking
             services.AddCronJob<AnalyticSynced>(c =>
             {
                 c.TimeZoneInfo = TimeZoneInfo.Local;
-                //c.CronExpression = @"*/1 * * * * *";
-                c.CronExpression = @"0 3 1 */2 *"; //  Run every 60 days at 3 AM
+                c.CronExpression = @"0 */5 * * *"; // Run every 5 hours
             });
 
             services.AddControllersWithViews();
+            services.AddControllers();
+            services.AddMvc().AddNewtonsoftJson();
+
+            services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            });
+
+            services.AddDbContext<linkserviceContext>(options =>
+            {
+                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
+
             services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.Configure<Dependencies>(Configuration.GetSection("Dependencies"));
             services.AddRazorPages();
-            services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-                options.HttpsPort = 443;
-            });
-
-            services.AddHsts(options =>
-            {
-                options.Preload = false;
-                options.IncludeSubDomains = false;
-                options.MaxAge = TimeSpan.FromDays(30);
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,11 +73,7 @@ namespace DeepLinking
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseHsts();
-            }
-
+           
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();

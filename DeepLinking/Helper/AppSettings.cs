@@ -9,6 +9,8 @@ namespace DeepLinking.Helper
     {
         public string Host { get; set; }
         public string RoutesAppUrl { get; set; }
-        
+        public int Prime { get; set; }
+        public int PrimeInverse { get; set; }
+
     }
 }

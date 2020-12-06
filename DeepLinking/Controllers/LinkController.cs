@@ -5,10 +5,12 @@ using System.Net;
 using System.Threading.Tasks;
 using DeepLinking.Helper;
 using DeepLinking.Models;
+using DeepLinking.Models.DBModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Obfuscation;
 using RestSharp;
 using UAParser;
 
@@ -18,13 +20,18 @@ namespace DeepLinking.Controllers
     {
         private readonly AppSettings _appSettings;
         private readonly Dependencies _dependencies;
-        public LinkController(IOptions<AppSettings> appSettings, IOptions<Dependencies> dependencies)
+        private readonly linkserviceContext _context;
+        public LinkController(IOptions<AppSettings> appSettings, IOptions<Dependencies> dependencies, linkserviceContext linkserviceContext)
         {
             _appSettings = appSettings.Value;
             _dependencies = dependencies.Value;
+            _context = linkserviceContext;
         }
+
+        [Obsolete]
         public IActionResult Index(string id)
         {
+            List<Links> promotions = new List<Links>();
             try
             {
                 var userAgent = HttpContext.Request.Headers["User-Agent"];
@@ -33,7 +40,6 @@ namespace DeepLinking.Controllers
                 ClientInfo clientInfo = uaParser.Parse(uaString);
                 if (!string.IsNullOrEmpty(id))
                 {
-                    List<Links> promotions = new List<Links>();
                     var client = new RestClient(_appSettings.Host + _dependencies.PromotionsUrl + id);
                     var request = new RestRequest(Method.GET);
                     IRestResponse response = client.Execute(request);
@@ -47,6 +53,7 @@ namespace DeepLinking.Controllers
                     {
                         foreach (var item in promotions)
                         {
+                            LinkLogsData(clientInfo, item.PromotionId);
                             var webLink = promotions.Where(x => x.PromotionId == id).Select(x => x.Web).FirstOrDefault();
                             if (clientInfo.OS.Family.ToLower() == "windows")
                             {
@@ -92,19 +99,35 @@ namespace DeepLinking.Controllers
                     }
                     else
                     {
+                        LinkLogsData(clientInfo, id);
                         return Redirect(_appSettings.RoutesAppUrl + id);
                     }
                 }
                 else
                 {
+                    LinkLogsData(clientInfo, id);
                     return Redirect(_appSettings.RoutesAppUrl + id);
                 }
+                LinkLogsData(clientInfo, id);
                 return Redirect(_appSettings.RoutesAppUrl + id);
             }
             catch (Exception)
             {
                 return Redirect(_appSettings.RoutesAppUrl + id);
             }
+        }
+
+        [Obsolete]
+        public void LinkLogsData(ClientInfo clientInfo, string promotionId)
+        {
+            int? promotionIdDecode = ObfuscationClass.DecodeId(Convert.ToInt32(promotionId), _appSettings.PrimeInverse);
+            LinkLogs linkLogs = new LinkLogs();
+            linkLogs.PromotionId = promotionIdDecode;
+            linkLogs.ClientBrowser = clientInfo.UserAgent.Family.ToLower();
+            linkLogs.ClientOs = clientInfo.OS.Family.ToLower();
+            linkLogs.CreatedAt = DateTime.Now;
+            _context.LinkLogs.Add(linkLogs);
+            _context.SaveChanges();
         }
     }
 }
