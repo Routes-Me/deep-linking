@@ -16,7 +16,14 @@ namespace DeepLinking.Models
 
     public class LinkResponse : Response
     {
+        public Pagination pagination { get; set; }
         public List<Links> data { get; set; }
+        public PromotionsInclude included { get; set; }
+    }
+
+    public class PromotionsInclude
+    {
+        public List<Promotion> promotions { get; set; }
     }
 
     public class GetAnalyticsResponse : Response
@@ -24,11 +31,4 @@ namespace DeepLinking.Models
         public DateTime? CreatedAt { get; set; }
     }
 
-    public class PromotionsGetResponse : Response
-    {
-        public Pagination pagination { get; set; }
-        public List<PromotionsModel> data { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public JObject included { get; set; }
-    }
 }

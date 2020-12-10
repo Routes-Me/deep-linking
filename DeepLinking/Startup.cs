@@ -1,22 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Threading.Tasks;
 using DeepLinking.Abstraction;
 using DeepLinking.Helper;
-using DeepLinking.Helper.CronJobServices;
-using DeepLinking.Helper.CronJobServices.CronJobExtensionMethods;
-using DeepLinking.Models.DBModels;
+using DeepLinking.Models;
 using DeepLinking.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using System.Threading.Channels;
 
 namespace DeepLinking
 {
@@ -33,11 +25,6 @@ namespace DeepLinking
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCronJob<AnalyticSynced>(c =>
-            {
-                c.TimeZoneInfo = TimeZoneInfo.Local;
-                c.CronExpression = @"0 */5 * * *"; // Run every 5 hours
-            });
 
             services.AddControllersWithViews();
             services.AddControllers();
@@ -48,11 +35,6 @@ namespace DeepLinking
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
 
-            services.AddDbContext<linkserviceContext>(options =>
-            {
-                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
-            });
-
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -60,11 +42,16 @@ namespace DeepLinking
                        .AllowAnyHeader();
             }));
 
-            services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+            services.AddHostedService<QueuedHostedService>();
+            services.AddSingleton<Channel<LinkLogs>>(Channel.CreateUnbounded<LinkLogs>(new UnboundedChannelOptions() { SingleReader = true }));
+            services.AddSingleton<ChannelReader<LinkLogs>>(svc => svc.GetRequiredService<Channel<LinkLogs>>().Reader);
+            services.AddSingleton<ChannelWriter<LinkLogs>>(svc => svc.GetRequiredService<Channel<LinkLogs>>().Writer);
+
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.Configure<Dependencies>(Configuration.GetSection("Dependencies"));
             services.AddRazorPages();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
