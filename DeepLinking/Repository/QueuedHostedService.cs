@@ -39,7 +39,8 @@ namespace DeepLinking.Repository
                     LinkLogs linkLogs = new LinkLogs();
                     linkLogs.LinkLogId = item.LinkLogId;
                     linkLogs.PromotionId = item.PromotionId;
-                    //linkLogs.AdvertisementId = item.AdvertisementId;
+                    linkLogs.AdvertisementId = item.AdvertisementId;
+                    linkLogs.InstitutionId = item.InstitutionId;
                     linkLogs.ClientBrowser = item.ClientBrowser;
                     linkLogs.ClientOs = item.ClientOs;
                     linkLogs.CreatedAt = item.CreatedAt;

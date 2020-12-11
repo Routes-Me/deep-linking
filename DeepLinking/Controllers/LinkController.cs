@@ -37,7 +37,7 @@ namespace DeepLinking.Controllers
         {
             List<Links> links = new List<Links>();
             List<Promotion> promotions = new List<Promotion>();
-            string advertisementId = string.Empty;
+            string advertisementId = string.Empty, institutionId = string.Empty;
             try
             {
                 var userAgent = HttpContext.Request.Headers["User-Agent"];
@@ -55,12 +55,13 @@ namespace DeepLinking.Controllers
                         var linksData = JsonConvert.DeserializeObject<LinkResponse>(result);
                         links.AddRange(linksData.data);
                         advertisementId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.AdvertisementId).FirstOrDefault();
+                        institutionId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.InstitutionId).FirstOrDefault();
                     }
                     if (links.Count > 0)
                     {
                         foreach (var item in links)
                         {
-                            await LinkLogsDataAsync(clientInfo, id, advertisementId);
+                            await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId);
                             var webLink = links.Where(x => x.PromotionId == id).Select(x => x.Web).FirstOrDefault();
                             if (clientInfo.OS.Family.ToLower() == "windows")
                             {
@@ -106,16 +107,16 @@ namespace DeepLinking.Controllers
                     }
                     else
                     {
-                        await LinkLogsDataAsync(clientInfo, id, advertisementId);
+                        await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId);
                         return Redirect(_appSettings.RoutesAppUrl + id);
                     }
                 }
                 else
                 {
-                    await LinkLogsDataAsync(clientInfo, id, advertisementId);
+                    await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId);
                     return Redirect(_appSettings.RoutesAppUrl + id);
                 }
-                await LinkLogsDataAsync(clientInfo, id, advertisementId);
+                await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId);
                 return Redirect(_appSettings.RoutesAppUrl + id);
             }
             catch (Exception)
@@ -125,11 +126,12 @@ namespace DeepLinking.Controllers
         }
 
         [Obsolete]
-        public async Task LinkLogsDataAsync(ClientInfo clientInfo, string promotionId, string advertisementId)
+        public async Task LinkLogsDataAsync(ClientInfo clientInfo, string promotionId, string advertisementId, string institutionId)
         {
             LinkLogs linkLogs = new LinkLogs();
             linkLogs.PromotionId = promotionId;
-            //linkLogs.AdvertisementId = advertisementId;
+            linkLogs.AdvertisementId = advertisementId;
+            linkLogs.InstitutionId = institutionId;
             linkLogs.ClientBrowser = clientInfo.UserAgent.Family.ToLower();
             linkLogs.ClientOs = clientInfo.OS.Family.ToLower();
             linkLogs.CreatedAt = DateTime.Now;
