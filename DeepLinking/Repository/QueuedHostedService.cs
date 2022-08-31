@@ -44,6 +44,7 @@ namespace DeepLinking.Repository
                     linkLogs.ClientBrowser = item.ClientBrowser;
                     linkLogs.ClientOs = item.ClientOs;
                     linkLogs.CreatedAt = item.CreatedAt;
+                    linkLogs.DeviceId = item.DeviceId;
 
                     var postClient = new RestClient(_appSettings.Host + _dependencies.LinklogsUrl);
                     var postRequest = new RestRequest(Method.POST);
