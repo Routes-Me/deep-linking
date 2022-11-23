@@ -34,8 +34,12 @@ namespace DeepLinking.Controllers
 
         [Obsolete]
         [Route("{id}/devices/{deviceId}")]
-        public async Task<IActionResult> Index(string id, string deviceId)
+        public async Task<IActionResult> Index(string id, string deviceId, string invitationId)
         {
+            if (!string.IsNullOrEmpty(invitationId))
+            {
+                return Redirect(_appSettings.LinksUrl + invitationId);
+            }
             List<Links> links = new List<Links>();
             List<Promotion> promotions = new List<Promotion>();
             string advertisementId = string.Empty, institutionId = string.Empty;
@@ -56,7 +60,7 @@ namespace DeepLinking.Controllers
                         var linksData = JsonConvert.DeserializeObject<LinkResponse>(result);
                         links.AddRange(linksData.data);
                         advertisementId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.AdvertisementId).FirstOrDefault();
-                        institutionId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.InstitutionId).FirstOrDefault();         
+                        institutionId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.InstitutionId).FirstOrDefault();
                     }
                     if (links.Count > 0)
                     {

@@ -9,5 +9,6 @@ namespace DeepLinking.Helper
     {
         public string Host { get; set; }
         public string RoutesAppUrl { get; set; }
+        public string LinksUrl { get; set; }
     }
 }
