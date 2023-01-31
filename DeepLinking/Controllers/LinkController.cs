@@ -34,8 +34,12 @@ namespace DeepLinking.Controllers
 
         [Obsolete]
         [Route("{id}/devices/{deviceId}")]
-        public async Task<IActionResult> Index(string id, string deviceId)
+        public async Task<IActionResult> Index(string id, string deviceId, string invitationId, decimal lat, decimal lng)
         {
+            if (!string.IsNullOrEmpty(invitationId))
+            {
+                return Redirect(_appSettings.LinksUrl + invitationId + "? lat={" + lat + "}&lng={" + lng + "}");
+            }
             List<Links> links = new List<Links>();
             List<Promotion> promotions = new List<Promotion>();
             string advertisementId = string.Empty, institutionId = string.Empty;
@@ -56,13 +60,13 @@ namespace DeepLinking.Controllers
                         var linksData = JsonConvert.DeserializeObject<LinkResponse>(result);
                         links.AddRange(linksData.data);
                         advertisementId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.AdvertisementId).FirstOrDefault();
-                        institutionId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.InstitutionId).FirstOrDefault();         
+                        institutionId = linksData.included.promotions.Where(x => x.PromotionId == id).Select(x => x.InstitutionId).FirstOrDefault();
                     }
                     if (links.Count > 0)
                     {
                         foreach (var item in links)
                         {
-                            await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId);
+                            await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId, lat, lng);
                             var webLink = links.Where(x => x.PromotionId == id).Select(x => x.Web).FirstOrDefault();
                             if (clientInfo.OS.Family.ToLower() == "windows")
                             {
@@ -108,16 +112,16 @@ namespace DeepLinking.Controllers
                     }
                     else
                     {
-                        await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId);
+                        await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId, lat, lng);
                         return Redirect(_appSettings.RoutesAppUrl + id);
                     }
                 }
                 else
                 {
-                    await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId,deviceId);
+                    await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId, lat, lng);
                     return Redirect(_appSettings.RoutesAppUrl + id);
                 }
-                await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId);
+                await LinkLogsDataAsync(clientInfo, id, advertisementId, institutionId, deviceId, lat, lng);
                 return Redirect(_appSettings.RoutesAppUrl + id);
             }
             catch (Exception)
@@ -127,7 +131,7 @@ namespace DeepLinking.Controllers
         }
 
         [Obsolete]
-        public async Task LinkLogsDataAsync(ClientInfo clientInfo, string promotionId, string advertisementId, string institutionId, string deviceId)
+        public async Task LinkLogsDataAsync(ClientInfo clientInfo, string promotionId, string advertisementId, string institutionId, string deviceId, decimal lat, decimal lng)
         {
             LinkLogs linkLogs = new LinkLogs();
             linkLogs.PromotionId = promotionId;
@@ -137,6 +141,8 @@ namespace DeepLinking.Controllers
             linkLogs.ClientOs = clientInfo.OS.Family.ToLower();
             linkLogs.CreatedAt = DateTime.Now;
             linkLogs.DeviceId = deviceId;
+            linkLogs.Longitude = lng;
+            linkLogs.Latitude = lat;
             await _channel.WriteAsync(linkLogs);
         }
     }
