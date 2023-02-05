@@ -11,8 +11,11 @@ namespace DeepLinking.Models
         public string PromotionId { get; set; }
         public string AdvertisementId { get; set; }
         public string InstitutionId { get; set; }
+        public string DeviceId { get; set; }
         public string ClientBrowser { get; set; }
         public string ClientOs { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
     }
 }
