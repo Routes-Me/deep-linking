@@ -10,19 +10,19 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '1b3541aa-ea83-4430-be86-765ba97b49d2'
+  dockerRegistryServiceConnection: 'c0732086-1577-49d2-bb32-cbbb4c314fbd'
   imageRepository: 'deeplinking'
   containerRegistry: 'stagenoruaebscontainerregistry.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/DeepLinking/Dockerfile.stage'
   tag: '$(Build.BuildId)'
-  
+
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
 stages:
 - stage: Build
   displayName: Build and push stage
-  jobs:  
+  jobs:
   - job: Build
     displayName: Build
     pool:
