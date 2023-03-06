@@ -33,8 +33,9 @@ namespace DeepLinking.Controllers
         }
 
         [Obsolete]
+        [Route("{id}")]
         [Route("{id}/devices/{deviceId}")]
-        public async Task<IActionResult> Index(string id, string deviceId, string invitationId, decimal lat, decimal lng)
+        public async Task<IActionResult> Index([FromRoute] string id, [FromRoute] string deviceId, [FromQuery] string invitationId,[FromQuery] decimal lat,[FromQuery] decimal lng)
         {
             if (!string.IsNullOrEmpty(invitationId))
             {
